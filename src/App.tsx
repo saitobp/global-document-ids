@@ -104,7 +104,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto px-4 py-8 flex flex-col gap-6">
+      <div className="max-w-5xl mx-auto px-4 py-8 flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold tracking-tight">
@@ -119,6 +119,7 @@ export default function App() {
           </Button>
         </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {ids.map((doc) => {
           const displayGenerated = doc.format
             ? doc.format(doc.generated)
@@ -162,6 +163,7 @@ export default function App() {
             </Card>
           );
         })}
+        </div>
       </div>
     </div>
   );

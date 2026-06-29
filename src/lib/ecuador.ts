@@ -79,6 +79,22 @@ function generateProvince30Standard(): string {
   }
 }
 
+function generateAnyProvinceThirdDigit(digit: 6 | 9): string {
+  const province = Math.floor(Math.random() * 24) + 1;
+  const p = province.toString().padStart(2, "0");
+  let partial = p + digit;
+  for (let i = 0; i < 6; i++) partial += Math.floor(Math.random() * 10);
+  const coefficients = [2, 1, 2, 1, 2, 1, 2, 1, 2];
+  let sum = 0;
+  for (let i = 0; i < 9; i++) {
+    let prod = parseInt(partial[i], 10) * coefficients[i];
+    if (prod >= 10) prod -= 9;
+    sum += prod;
+  }
+  const checksum = sum % 10 === 0 ? 0 : 10 - (sum % 10);
+  return partial + checksum;
+}
+
 function generateChecksumZero(): string {
   while (true) {
     const province = Math.floor(Math.random() * 24) + 1;
@@ -113,6 +129,16 @@ export function generateEcuadorEdgeCases(): EdgeCase[] {
       label: "Province 30 – standard",
       code: generateProvince30Standard(),
       description: "Foreign residents province code (30), valid standard form",
+    },
+    {
+      label: "Any province – third digit 6",
+      code: generateAnyProvinceThirdDigit(6),
+      description: "Province 1–24 with third digit 6 — valid checksum but fails the ≤ 5 rule",
+    },
+    {
+      label: "Any province – third digit 9",
+      code: generateAnyProvinceThirdDigit(9),
+      description: "Province 1–24 with third digit 9 — valid checksum but fails the ≤ 5 rule",
     },
     {
       label: "Checksum yields 0",
