@@ -10,6 +10,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { generateEcuadorCedula, generateEcuadorEdgeCases } from "@/lib/ecuador";
 import { generateRUT, formatRUT, generateChileEdgeCases } from "@/lib/chile";
+import { generateCUIL, formatCUIT, generateArgentinaEdgeCases } from "@/lib/argentina";
+import { generateColombiaCedula, generateColombiaEdgeCases } from "@/lib/colombia";
 
 function IdRow({
   value,
@@ -95,6 +97,19 @@ function buildIds(): DocumentCard[] {
       generated: generateRUT(),
       edgeCases: generateChileEdgeCases(),
       format: formatRUT,
+    },
+    {
+      country: "Argentina",
+      docType: "CUIT / CUIL",
+      generated: generateCUIL(),
+      edgeCases: generateArgentinaEdgeCases(),
+      format: formatCUIT,
+    },
+    {
+      country: "Colombia",
+      docType: "Cédula / NIT",
+      generated: generateColombiaCedula(),
+      edgeCases: generateColombiaEdgeCases(),
     },
   ];
 }
