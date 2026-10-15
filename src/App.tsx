@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { generateEcuadorCedula, generateEcuadorEdgeCases } from "@/lib/ecuador";
 import { generateRUT, formatRUT, generateChileEdgeCases } from "@/lib/chile";
-import { generateCUIL, formatCUIT, generateArgentinaEdgeCases } from "@/lib/argentina";
+import { generateDNI, formatCUIT, generateArgentinaEdgeCases } from "@/lib/argentina";
 import { generateColombiaCedula, generateColombiaEdgeCases } from "@/lib/colombia";
 
 function IdRow({
@@ -18,11 +18,13 @@ function IdRow({
   label,
   description,
   isEdgeCase = false,
+  rejected = false,
 }: {
   value: string;
   label?: string;
   description?: string;
   isEdgeCase?: boolean;
+  rejected?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -44,6 +46,14 @@ function IdRow({
                 className="text-[10px] h-4 px-1.5 leading-none"
               >
                 edge case
+              </Badge>
+            )}
+            {rejected && (
+              <Badge
+                variant="destructive"
+                className="text-[10px] h-4 px-1.5 leading-none"
+              >
+                backend rejects
               </Badge>
             )}
           </div>
@@ -81,6 +91,8 @@ type DocumentCard = {
   generated: string;
   edgeCases: EdgeCase[];
   format?: (code: string) => string;
+  // personal_code_validations/<currency> regex from our backend
+  backendRegex?: RegExp;
 };
 
 function buildIds(): DocumentCard[] {
@@ -100,16 +112,18 @@ function buildIds(): DocumentCard[] {
     },
     {
       country: "Argentina",
-      docType: "CUIT / CUIL",
-      generated: generateCUIL(),
+      docType: "DNI / CUIT / CUIL",
+      generated: generateDNI(),
       edgeCases: generateArgentinaEdgeCases(),
       format: formatCUIT,
+      backendRegex: /^[1-9][0-9]{6,7}$/,
     },
     {
       country: "Colombia",
       docType: "Cédula / NIT",
       generated: generateColombiaCedula(),
       edgeCases: generateColombiaEdgeCases(),
+      backendRegex: /^[1-9][0-9]{5,9}$/,
     },
   ];
 }
@@ -149,10 +163,22 @@ export default function App() {
                     {doc.docType}
                   </Badge>
                 </div>
-                <CardDescription>Random valid ID</CardDescription>
+                <CardDescription>
+                  Random valid ID
+                  {doc.backendRegex && (
+                    <>
+                      {" · backend "}
+                      <code className="font-mono">{doc.backendRegex.source}</code>
+                    </>
+                  )}
+                </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-0">
-                <IdRow value={displayGenerated} label="Generated" />
+                <IdRow
+                  value={displayGenerated}
+                  label="Generated"
+                  rejected={doc.backendRegex && !doc.backendRegex.test(doc.generated)}
+                />
                 {doc.edgeCases.length > 0 && (
                   <>
                     <p className="text-xs text-muted-foreground mt-3 mb-1 font-medium uppercase tracking-wide">
@@ -169,6 +195,7 @@ export default function App() {
                           label={ec.label}
                           description={ec.description}
                           isEdgeCase
+                          rejected={doc.backendRegex && !doc.backendRegex.test(ec.code)}
                         />
                       );
                     })}

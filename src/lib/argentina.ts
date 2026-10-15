@@ -25,10 +25,13 @@ function buildCUIT(prefix: string, dni: string): string {
   return base + (r === 0 ? 0 : 11 - r);
 }
 
+// Backend personal code for ARS is the bare DNI: ^[1-9][0-9]{6,7}$
+export function generateDNI(min = 10_000_000, max = 49_999_999): string {
+  return (min + Math.floor(Math.random() * (max - min + 1))).toString();
+}
+
 function randomDni(min: number, max: number): string {
-  return (min + Math.floor(Math.random() * (max - min + 1)))
-    .toString()
-    .padStart(8, "0");
+  return generateDNI(min, max).padStart(8, "0");
 }
 
 // Loops until the original prefix yields the wanted remainder (if any)
@@ -46,17 +49,24 @@ function generateCUITWhere(
 }
 
 export function formatCUIT(cuit: string): string {
+  if (cuit.length !== 11) return cuit; // bare DNI
   return `${cuit.slice(0, 2)}-${cuit.slice(2, 10)}-${cuit.slice(10)}`;
-}
-
-export function generateCUIL(): string {
-  return generateCUITWhere(Math.random() < 0.5 ? "20" : "27");
 }
 
 export type EdgeCase = { label: string; code: string; description: string };
 
 export function generateArgentinaEdgeCases(): EdgeCase[] {
   return [
+    {
+      label: "DNI – 7 digits",
+      code: generateDNI(1_000_000, 9_999_999),
+      description: "Legacy short DNI, no leading-zero padding (shortest the backend accepts)",
+    },
+    {
+      label: "DNI – foreign resident",
+      code: generateDNI(92_000_000, 95_999_999),
+      description: "Bare DNI in the 92–95 million range issued to foreigners",
+    },
     {
       label: "Prefix 23 – reassigned male",
       code: generateCUITWhere("20", 1),
